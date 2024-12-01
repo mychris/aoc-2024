@@ -1,0 +1,9 @@
+(executable
+ (modes byte exe)
+ (name main)
+ (public_name aoc-2024)
+ (libraries aoc2024)
+ (preprocess
+  (pps ppx_blob))
+ (preprocessor_deps
+  (glob_files ../inputs/day*.txt)))
