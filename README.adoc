@@ -2,14 +2,14 @@
 
 OCaml project with AoC 2024 solutions.
 
-Developed with `The OCaml toplevel, version 5.2.1`, .
+Developed with `The OCaml toplevel, version 5.2.1`.
 
 [source,ocaml]
 ----
 Aoc2024.Common.time Aoc2024.Day01.example;;
 
 let input = In_channel.with_open_text "path/to/input.txt" In_channel.input_all
-in Aoc2024.Common.time (fun () -> Aoc2024.Day01.run input) ;;
+in Aoc2024.Common.time (fun () -> Aoc2024.Day01.run input);;
 
 #show Aoc2024;;
 ----
