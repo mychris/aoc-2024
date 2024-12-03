@@ -20,4 +20,5 @@
  (depends
    ocaml
    dune
+   re
    ppx_blob))

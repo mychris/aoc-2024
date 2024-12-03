@@ -15,12 +15,13 @@ let parse_input input =
 let is_safe amount = amount >= 1 && amount <= 3
 let is_decreasing left right = is_safe (left - right)
 let is_increasing left right = is_safe (right - left)
-let rem l idx = List.filteri (fun i _ -> idx != i) l
+let rem l n = List.filteri (fun idx _ -> n != idx) l
 
 let check report =
   let rec inner f report =
     match report with
-    | a :: b :: _ -> if f a b then inner f (List.tl report) else false
+    | a :: b :: _ when f a b -> inner f (List.tl report)
+    | _ :: _ :: _ -> false
     | _ -> true
   in
   inner is_decreasing report || inner is_increasing report
@@ -28,7 +29,7 @@ let check report =
 
 let check_skipping report =
   let rec check_skipping_inner report idx =
-    if idx == 0
+    if idx = 0
     then check (List.tl report)
     else check (rem report idx) || check_skipping_inner report (idx - 1)
   in
