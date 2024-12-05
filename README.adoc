@@ -30,6 +30,7 @@ and computes the results. To run the provided example, no input is required.
 
 = Dependencies
 
+* https://opam.ocaml.org/packages/re/[ocaml-re]
 * https://opam.ocaml.org/packages/ppx_blob/[ppx_blob]
 
 = Links

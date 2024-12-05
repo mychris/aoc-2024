@@ -2,6 +2,8 @@ let days =
   [| Aoc2024.Day01.run, "Historian Hysteria", [%blob "../inputs/day01.txt"]
    ; Aoc2024.Day02.run, "Red-Nosed Reports", [%blob "../inputs/day02.txt"]
    ; Aoc2024.Day03.run, "Mull It Over", [%blob "../inputs/day03.txt"]
+   ; Aoc2024.Day04.run, "Ceres Search", [%blob "../inputs/day04.txt"]
+   ; Aoc2024.Day05.run, "Print Queue", [%blob "../inputs/day05.txt"]
   |]
 ;;
 
