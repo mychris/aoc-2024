@@ -4,22 +4,15 @@ type field =
   | Visited
   | Guard
 
-module Coordinate = struct
+module Coord = struct
   type t = int * int
-
-  let compare (x1, y1) (x2, y2) = ((x2 lsl 20) lor y2) - ((x1 lsl 20) lor y1)
 end
 
 module Guard = struct
   type t = int * int * int
 
   let movement = [| -1, 0; 0, 1; 1, 0; 0, -1 |]
-  let make x y = x, y, 0
-
-  let compare (x1, y1, dir1) (x2, y2, dir2) =
-    (* compare is really crucial and only needed for the sets, so this should be fine *)
-    (x2 - x1) lor (y2 - y1) lor (dir2 - dir1)
-  ;;
+  let init x y = x, y, 0
 
   let rotate guard =
     let x, y, dir = guard in
@@ -38,13 +31,13 @@ module Guard = struct
   ;;
 end
 
-module CoordSet = Set.Make (Coordinate)
-module GuardSet = Set.Make (Guard)
-
 module Lab = struct
   type t = int * field array
 
-  let look_at pos lab =
+  let width (lab : t) = fst lab
+  let height (lab : t) = Array.length (snd lab) / fst lab
+
+  let look_at (pos : Coord.t) (lab : t) =
     let x, y = pos in
     let width, arr = lab in
     let idx = (x * width) + y in
@@ -53,14 +46,14 @@ module Lab = struct
     else Some arr.(idx)
   ;;
 
-  let to_seq lab =
+  let to_seq (lab : t) =
     let width, arr = lab in
     Array.copy arr
     |> Array.to_seqi
     |> Seq.map (fun (idx, e) -> (idx / width, idx mod width), e)
   ;;
 
-  let add pos elm lab =
+  let add (pos : Coord.t) (elm : field) (lab : t) =
     let width, arr = lab in
     let x, y = pos in
     let c = Array.copy arr in
@@ -68,7 +61,7 @@ module Lab = struct
     width, c
   ;;
 
-  let pp fmt lab =
+  let pp fmt (lab : t) =
     let width, arr = lab in
     Array.iteri
       (fun idx e ->
@@ -79,6 +72,44 @@ module Lab = struct
         | Visited -> Format.fprintf fmt "X"
         | Guard -> Format.fprintf fmt "^")
       arr
+  ;;
+end
+
+(** Mutable datastructure representing a set of guard *)
+module GuardSet = struct
+  type t = int array array
+
+  let for_lab lab = Array.make_matrix (Lab.width lab) (Lab.height lab) 0
+
+  let mem (guard : Guard.t) (guard_set : t) =
+    let x, y, dir = guard in
+    (1 lsl dir) land guard_set.(x).(y) <> 0
+  ;;
+
+  let add (guard : Guard.t) (guard_set : t) =
+    let x, y, dir = guard in
+    guard_set.(x).(y) <- guard_set.(x).(y) lor (1 lsl dir);
+    guard_set
+  ;;
+end
+
+(** Mutable datastructure representing a set of coordinates *)
+module CoordSet = struct
+  type t = bool array array
+
+  let for_lab lab = Array.make_matrix (Lab.width lab) (Lab.height lab) false
+  let mem (coord : Coord.t) (coord_set : t) = coord_set.(fst coord).(snd coord)
+
+  let add (coord : Coord.t) (coord_set : t) =
+    coord_set.(fst coord).(snd coord) <- true;
+    coord_set
+  ;;
+
+  let cardinal (coord_set : t) =
+    Array.fold_left
+      (fun acc arr -> Array.fold_left (fun acc x -> acc + Bool.to_int x) acc arr)
+      0
+      coord_set
   ;;
 end
 
@@ -102,8 +133,8 @@ let parse_input input =
   let guard =
     Seq.fold_lefti
       (fun acc x s ->
-        Seq.fold_lefti (fun acc y elm -> if elm = '^' then Guard.make x y else acc) acc s)
-      (Guard.make 0 0)
+        Seq.fold_lefti (fun acc y elm -> if elm = '^' then Guard.init x y else acc) acc s)
+      (Guard.init 0 0)
       in_list
   in
   guard, (width, arr)
@@ -118,7 +149,7 @@ let test_obstacle lab guard =
     | Some _ -> test_obstacle' lab (Guard.move guard) (GuardSet.add guard visited)
     | None -> false
   in
-  test_obstacle' lab guard GuardSet.empty
+  test_obstacle' lab guard (GuardSet.for_lab lab)
 ;;
 
 let find_obstacles lab guard visited =
@@ -140,7 +171,7 @@ let solve lab guard =
     | Some _ -> solve' lab next_guard (CoordSet.add (Guard.position guard) visited)
     | None -> CoordSet.add (Guard.position guard) visited
   in
-  let visited = solve' lab guard CoordSet.empty in
+  let visited = solve' lab guard (CoordSet.for_lab lab) in
   [ CoordSet.cardinal visited; find_obstacles lab guard visited ]
 ;;
 
