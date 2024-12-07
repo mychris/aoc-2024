@@ -2,3 +2,5 @@ _build
 
 inputs/*
 !inputs/.gitkeep
+
+perf.data*

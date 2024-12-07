@@ -1,5 +1,7 @@
 (executable
  (modes byte exe)
+ (flags
+  (:standard -g))
  (name main)
  (public_name aoc-2024)
  (libraries aoc2024)
