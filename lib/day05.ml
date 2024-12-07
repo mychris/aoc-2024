@@ -11,7 +11,7 @@ let parse_input input =
   |> fun l -> List.of_seq (fst l), List.of_seq (snd l)
 ;;
 
-let pp_orderings os =
+let pre_process_orderings os =
   let process map ordering =
     match IntMap.find_opt (List.nth ordering 0) map with
     | Some list -> IntMap.add (List.nth ordering 0) (List.nth ordering 1 :: list) map
@@ -21,7 +21,10 @@ let pp_orderings os =
 ;;
 
 let check_ordering orderings first second =
-  IntMap.find first orderings |> List.find_opt (fun x -> x = second) |> Option.is_some
+  IntMap.find_opt first orderings
+  |> Option.map (fun x -> List.find_opt (fun x -> x = second) x)
+  |> Option.join
+  |> Option.is_some
 ;;
 
 let rec check_all orderings update =
@@ -52,7 +55,7 @@ let solve orderings updates =
   let compare_with_ordering orderings left right =
     if left = right then 0 else if check_ordering orderings left right then -1 else 1
   in
-  let orderings = pp_orderings orderings in
+  let orderings = pre_process_orderings orderings in
   let correct, incorrect = split_correct_incorrect orderings updates in
   let corrected =
     List.map (fun update -> List.sort (compare_with_ordering orderings) update) incorrect

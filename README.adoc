@@ -20,9 +20,19 @@ Use `dune` to build/execute/fmt, or have a look at the `Makefile`:
 * `dune exec aoc-2024`
 * `dune fmt`
 
-The `bin` directory contains a small main file, running all days at once.
-It requires the `inputs` directory to be populated with the input files for each
-day, like `inputs/day01.txt`. See the `main.ml` file for all input files.
+The executable can run the examples, or a single day as well:
+[source]
+----
+Usage: aoc-2024 [-day <day>] [-example]
+  -day <day> Run <day>. Use 0 to run all days (default)
+  -example Run the example instead of the input
+  -help  Display this list of options
+  --help  Display this list of options
+----
+
+The `bin` directory contains a small main file.  It requires the `inputs`
+directory to be populated with the input files for each day, like
+`inputs/day01.txt`. See the `main.ml` file for all input files.
 
 For each day one module is present in the `lib` directory, containing a `run`
 and an `example` function. `run` expects the input of the problem as a string
