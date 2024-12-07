@@ -1,3 +1,8 @@
+(***********************************************
+ * Too many micro opimizations
+ * Lots of mutable datastructures etc to
+ * increase performance
+ ***********************************************)
 type field =
   | Obstructed
   | Empty
@@ -6,29 +11,6 @@ type field =
 
 module Coord = struct
   type t = int * int
-end
-
-module Guard = struct
-  type t = int * int * int
-
-  let movement = [| -1, 0; 0, 1; 1, 0; 0, -1 |]
-  let init x y = x, y, 0
-
-  let rotate guard =
-    let x, y, dir = guard in
-    x, y, (dir + 1) mod 4
-  ;;
-
-  let move guard =
-    let x, y, dir = guard in
-    let mov_x, mov_y = movement.(dir) in
-    x + mov_x, y + mov_y, dir
-  ;;
-
-  let position guard =
-    let x, y, _ = guard in
-    x, y
-  ;;
 end
 
 module Lab = struct
@@ -40,10 +22,28 @@ module Lab = struct
   let look_at (pos : Coord.t) (lab : t) =
     let x, y = pos in
     let width, arr = lab in
-    let idx = (x * width) + y in
-    if x < 0 || y < 0 || y >= width || idx >= Array.length arr
-    then None
-    else Some arr.(idx)
+    if x lor y >= 0 && y < width
+    then (
+      let idx = (x * width) + y in
+      if idx < Array.length arr then Some (Array.unsafe_get arr idx) else None)
+    else None
+  ;;
+
+  (** Calculate the distance to the next obstacle from [pos] with [incr] *)
+  let distance_to_obstacle (pos : Coord.t) (incr : Coord.t) (lab : t) =
+    let x, y = pos in
+    let incr_x, incr_y = incr in
+    let width, height = width lab, height lab in
+    let _, arr = lab in
+    let rec distance_to_obstacle' x y distance =
+      if x >= 0 && y >= 0 && x < height && y < width
+      then
+        if Array.unsafe_get arr ((x * width) + y) <> Obstructed
+        then distance_to_obstacle' (x + incr_x) (y + incr_y) (distance + 1)
+        else Some distance
+      else None
+    in
+    distance_to_obstacle' x y 0
   ;;
 
   let to_seq (lab : t) =
@@ -56,9 +56,7 @@ module Lab = struct
   let add (pos : Coord.t) (elm : field) (lab : t) =
     let width, arr = lab in
     let x, y = pos in
-    let c = Array.copy arr in
-    c.((x * width) + y) <- elm;
-    width, c
+    arr.((x * width) + y) <- elm
   ;;
 
   let pp fmt (lab : t) =
@@ -75,6 +73,36 @@ module Lab = struct
   ;;
 end
 
+module Guard = struct
+  type t =
+    { x : int
+    ; y : int
+    ; dir : int
+    }
+
+  let movement = [| -1, 0; 0, 1; 1, 0; 0, -1 |]
+  let init x y = { x; y; dir = 0 }
+  let rotate (guard : t) = { guard with dir = (guard.dir + 1) land 3 }
+
+  let move (guard : t) =
+    let mov_x, mov_y = movement.(guard.dir) in
+    { guard with x = guard.x + mov_x; y = guard.y + mov_y }
+  ;;
+
+  (** snap the guard right before the next obstacle, or to the border *)
+  let snap lab (guard : t) =
+    let incr_x, incr_y = movement.(guard.dir) in
+    Lab.distance_to_obstacle (guard.x, guard.y) (incr_x, incr_y) lab
+    |> Option.map (fun distance ->
+      { guard with
+        x = guard.x + (incr_x * (distance - 1))
+      ; y = guard.y + (incr_y * (distance - 1))
+      })
+  ;;
+
+  let position (guard : t) = guard.x, guard.y
+end
+
 (** Mutable datastructure representing a set of guard *)
 module GuardSet = struct
   type t = int array array
@@ -82,14 +110,16 @@ module GuardSet = struct
   let for_lab lab = Array.make_matrix (Lab.width lab) (Lab.height lab) 0
 
   let mem (guard : Guard.t) (guard_set : t) =
-    let x, y, dir = guard in
-    (1 lsl dir) land guard_set.(x).(y) <> 0
+    (1 lsl guard.dir) land guard_set.(guard.x).(guard.y) <> 0
   ;;
 
   let add (guard : Guard.t) (guard_set : t) =
-    let x, y, dir = guard in
-    guard_set.(x).(y) <- guard_set.(x).(y) lor (1 lsl dir);
+    guard_set.(guard.x).(guard.y) <- guard_set.(guard.x).(guard.y) lor (1 lsl guard.dir);
     guard_set
+  ;;
+
+  let reset (guard_set : t) =
+    Array.iteri (fun _ row -> Array.iteri (fun j _ -> row.(j) <- 0) row) guard_set
   ;;
 end
 
@@ -114,13 +144,12 @@ module CoordSet = struct
 end
 
 let parse_input input =
+  let lines = String.split_on_char '\n' input in
+  let width = String.length (List.hd lines) in
   let in_list =
-    String.split_on_char '\n' input
+    List.filter_map (fun s -> if s = "" then None else Some (String.to_seq s)) lines
     |> List.to_seq
-    |> Seq.filter (fun s -> s <> "")
-    |> Seq.map (fun s -> String.to_seq s)
   in
-  let width = Seq.length (Option.get (Seq.find (fun _ -> true) in_list)) in
   let arr =
     Seq.concat in_list
     |> Seq.map (fun c ->
@@ -140,26 +169,31 @@ let parse_input input =
   guard, (width, arr)
 ;;
 
-let test_obstacle lab guard =
+let test_obstacle lab guard visited =
   let rec test_obstacle' lab guard visited =
-    GuardSet.mem guard visited
-    ||
-    match Lab.look_at (Guard.position (Guard.move guard)) lab with
-    | Some Obstructed -> test_obstacle' lab (Guard.rotate guard) visited
-    | Some _ -> test_obstacle' lab (Guard.move guard) (GuardSet.add guard visited)
+    let opt_guard = Guard.snap lab guard in
+    match opt_guard with
+    | Some guard ->
+      GuardSet.mem guard visited
+      || test_obstacle' lab (Guard.rotate guard) (GuardSet.add guard visited)
     | None -> false
   in
-  test_obstacle' lab guard (GuardSet.for_lab lab)
+  GuardSet.reset visited;
+  test_obstacle' lab guard visited
 ;;
 
 let find_obstacles lab guard visited =
+  let guard_set = GuardSet.for_lab lab in
   Lab.to_seq lab
-  |> Seq.filter (fun (_, v) -> v <> Obstructed)
-  |> Seq.map (fun (k, _) -> k)
-  |> Seq.filter (fun pos -> pos <> Guard.position guard && CoordSet.mem pos visited)
   |> Seq.fold_left
-       (fun acc pos ->
-         acc + if test_obstacle (Lab.add pos Obstructed lab) guard then 1 else 0)
+       (fun acc (k, v) ->
+         if v <> Obstructed && k <> Guard.position guard && CoordSet.mem k visited
+         then (
+           Lab.add k Obstructed lab;
+           let result = acc + if test_obstacle lab guard guard_set then 1 else 0 in
+           Lab.add k Empty lab;
+           result)
+         else acc)
        0
 ;;
 
