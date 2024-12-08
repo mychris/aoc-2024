@@ -8,6 +8,7 @@ let days =
    ; (module Aoc2024.Day05), "Print Queue", [%blob "../inputs/day05.txt"]
    ; (module Aoc2024.Day06), "Guard Gallivant", [%blob "../inputs/day06.txt"]
    ; (module Aoc2024.Day07), "Bridge Repair", [%blob "../inputs/day07.txt"]
+   ; (module Aoc2024.Day08), "Resonant Collinearity", [%blob "../inputs/day08.txt"]
   |]
 ;;
 
