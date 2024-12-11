@@ -23,8 +23,8 @@ Use `dune` to build/execute/fmt, or have a look at the `Makefile`:
 The executable can run the examples, or a single day as well:
 [source]
 ----
-Usage: aoc-2024 [-day <day>] [-example]
-  -day <day> Run <day>. Use 0 to run all days (default)
+Usage: aoc-2024 [-day <day>]... [-example]
+  -day <day> Run <day>. Can be given multiple times
   -example Run the example instead of the input
   -help  Display this list of options
   --help  Display this list of options
