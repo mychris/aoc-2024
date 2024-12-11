@@ -11,6 +11,7 @@ let day_specs =
    ; (module Aoc2024.Day08), "Resonant Collinearity", [%blob "../inputs/day08.txt"]
    ; (module Aoc2024.Day09), "Disk Fragmenter", [%blob "../inputs/day09.txt"]
    ; (module Aoc2024.Day10), "Hoof It", [%blob "../inputs/day10.txt"]
+   ; (module Aoc2024.Day11), "Plutonian Pebbles", [%blob "../inputs/day11.txt"]
   |]
 ;;
 

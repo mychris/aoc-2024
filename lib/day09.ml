@@ -1,9 +1,6 @@
-
 let run input =
   let _ = input in
   []
 ;;
 
-let example () =
-  []
-;;
+let example () = []
