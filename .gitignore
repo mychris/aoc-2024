@@ -34,3 +34,6 @@ inputs/*
 
 # perf
 perf.data*
+
+# other
+*.patch
