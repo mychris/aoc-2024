@@ -1,7 +1,10 @@
-module C = Aoc2024.Common
+module type Day = sig
+  val run : string -> int list
+  val example : unit -> int list
+end
 
 let day_specs =
-  [| (module Aoc2024.Day01 : C.Day), "Historian Hysteria", [%blob "../inputs/day01.txt"]
+  [| (module Aoc2024.Day01 : Day), "Historian Hysteria", [%blob "../inputs/day01.txt"]
    ; (module Aoc2024.Day02), "Red-Nosed Reports", [%blob "../inputs/day02.txt"]
    ; (module Aoc2024.Day03), "Mull It Over", [%blob "../inputs/day03.txt"]
    ; (module Aoc2024.Day04), "Ceres Search", [%blob "../inputs/day04.txt"]
@@ -15,6 +18,13 @@ let day_specs =
    ; (module Aoc2024.Day12), "Garden Groups", [%blob "../inputs/day12.txt"]
    ; (module Aoc2024.Day13), "Claw Contraption", [%blob "../inputs/day13.txt"]
   |]
+;;
+
+let time f =
+  let t = Sys.time () in
+  let res = f () in
+  Format.printf "Execution time: %fs\n" (Sys.time () -. t);
+  res
 ;;
 
 let arg_days = ref []
@@ -31,7 +41,7 @@ let arg_specs =
 
 let main days_to_run run_example =
   let runner (day_num, day_spec) =
-    let (module DAY : C.Day), name, input = day_spec in
+    let (module DAY : Day), name, input = day_spec in
     let result =
       if run_example then DAY.example () else if input = "" then [] else DAY.run input
     in
@@ -41,7 +51,7 @@ let main days_to_run run_example =
     Format.printf "Day %d: %s %s\n%!" day_num name result_string
   in
   Format.printf "Advent of Code 2024\n%!";
-  C.time (fun () -> List.iter runner days_to_run)
+  time (fun () -> List.iter runner days_to_run)
 ;;
 
 let () =
