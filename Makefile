@@ -1,9 +1,9 @@
 
-all:
-	dune build
+all build:
+	dune build --release
 
-run:
-	dune exec aoc-2024
+run exec:
+	dune exec --release aoc-2024
 
 fmt:
 	dune fmt
@@ -11,4 +11,4 @@ fmt:
 clean:
 	dune clean
 
-.PHONY: all run fmt clean
+.PHONY: all build run exec fmt clean
