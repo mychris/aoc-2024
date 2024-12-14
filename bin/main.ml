@@ -17,6 +17,7 @@ let day_specs =
    ; (module Aoc2024.Day11), "Plutonian Pebbles", [%blob "../inputs/day11.txt"]
    ; (module Aoc2024.Day12), "Garden Groups", [%blob "../inputs/day12.txt"]
    ; (module Aoc2024.Day13), "Claw Contraption", [%blob "../inputs/day13.txt"]
+   ; (module Aoc2024.Day14), "Restroom Redoubt", [%blob "../inputs/day14.txt"]
   |]
 ;;
 
