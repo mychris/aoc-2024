@@ -1,6 +1,6 @@
 module Day01 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   (** [parse_line line] parses a single input line with two numbers into [first * second]. *)
   let parse_line line =
@@ -73,12 +73,12 @@ end = struct
 
   let run input =
     let location_id_list = parse_input input in
-    [ First.solve location_id_list; Second.solve location_id_list ]
+    List.map string_of_int [ First.solve location_id_list; Second.solve location_id_list ]
   ;;
 
   let example () =
     let location_id_list = [ 3, 4; 4, 3; 2, 5; 1, 3; 3, 9; 3, 3 ] in
-    [ First.solve location_id_list; Second.solve location_id_list ]
+    List.map string_of_int [ First.solve location_id_list; Second.solve location_id_list ]
   ;;
 end
 

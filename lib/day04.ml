@@ -1,6 +1,6 @@
 module Day04 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   module Puzzle = struct
     type t = char array array
@@ -66,9 +66,11 @@ end = struct
   ;;
 
   let solve puzzle =
-    [ Puzzle.fold (fun coord _ count -> count + count_xmas puzzle coord) 0 puzzle
-    ; Puzzle.fold (fun coord _ count -> count + count_x_mas puzzle coord) 0 puzzle
-    ]
+    List.map
+      string_of_int
+      [ Puzzle.fold (fun coord _ count -> count + count_xmas puzzle coord) 0 puzzle
+      ; Puzzle.fold (fun coord _ count -> count + count_x_mas puzzle coord) 0 puzzle
+      ]
   ;;
 
   let run input =

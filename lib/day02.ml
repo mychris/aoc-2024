@@ -1,6 +1,6 @@
 module Day02 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   (** [parse_line line] parses a single input line with two numbers into [first * second]. *)
   let parse_line line =
@@ -44,7 +44,7 @@ end = struct
 
   let run input =
     let reports = parse_input input in
-    [ solve reports check; solve reports check_skipping ]
+    List.map string_of_int [ solve reports check; solve reports check_skipping ]
   ;;
 
   let example () =
@@ -57,7 +57,7 @@ end = struct
       ; [ 1; 3; 6; 7; 9 ]
       ]
     in
-    [ solve reports check; solve reports check_skipping ]
+    List.map string_of_int [ solve reports check; solve reports check_skipping ]
   ;;
 end
 

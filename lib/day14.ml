@@ -1,6 +1,6 @@
 module Day14 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   type spec =
     { x : int
@@ -93,9 +93,11 @@ end = struct
     let width, height = 101, 103 in
     let specs = parse input in
     let specs_after_100 = move specs width height 100 in
-    [ List.fold_left ( * ) 1 (count specs_after_100 width height)
-    ; find_tree specs width height
-    ]
+    List.map
+      string_of_int
+      [ List.fold_left ( * ) 1 (count specs_after_100 width height)
+      ; find_tree specs width height
+      ]
   ;;
 
   let example () =
@@ -116,7 +118,7 @@ end = struct
     in
     let specs = parse input in
     let specs_after_100 = move specs 11 7 100 in
-    [ List.fold_left ( * ) 1 (count specs_after_100 11 7); 0 ]
+    List.map string_of_int [ List.fold_left ( * ) 1 (count specs_after_100 11 7); 0 ]
   ;;
 end
 

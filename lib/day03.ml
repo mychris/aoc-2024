@@ -1,6 +1,6 @@
 module Day03 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   type intsr =
     | Do
@@ -56,14 +56,17 @@ end = struct
   ;;
 
   let solve f input = parse_input input |> f |> execute |> List.fold_left ( + ) 0
-  let run input = [ solve skip_flow input; solve interp_flow input ]
+
+  let run input =
+    List.map string_of_int [ solve skip_flow input; solve interp_flow input ]
+  ;;
 
   let example () =
     let in1 = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))" in
     let in2 =
       "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
     in
-    [ solve skip_flow in1; solve interp_flow in2 ]
+    List.map string_of_int [ solve skip_flow in1; solve interp_flow in2 ]
   ;;
 end
 

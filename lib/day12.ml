@@ -1,6 +1,6 @@
 module Day12 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   module Direction = struct
     type t =
@@ -116,7 +116,7 @@ end = struct
       List.map (explore_region garden) regions
       |> List.fold_left (fun (a1, a2) (a, p, s) -> a1 + (a * p), a2 + (a * s)) (0, 0)
     in
-    [ fst ans; snd ans ]
+    List.map string_of_int [ fst ans; snd ans ]
   ;;
 
   let example () =

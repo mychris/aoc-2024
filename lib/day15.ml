@@ -1,6 +1,6 @@
 module Day15 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   module Coord = struct
     type t = int * int
@@ -145,7 +145,7 @@ end = struct
     let boxes, walls, robot = resize boxes walls robot in
     let result, _ = walk boxes walls robot movement in
     let r2 = checksum result walls in
-    [ r1; r2 ]
+    List.map string_of_int [ r1; r2 ]
   ;;
 
   let example () =

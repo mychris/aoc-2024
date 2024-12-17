@@ -1,6 +1,6 @@
 module type Day = sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end
 
 let day_specs =
@@ -20,6 +20,7 @@ let day_specs =
    ; (module Aoc2024.Day14), "Restroom Redoubt", [%blob "../inputs/day14.txt"]
    ; (module Aoc2024.Day15), "Warehouse Woes", [%blob "../inputs/day15.txt"]
    ; (module Aoc2024.Day16), "Reindeer Maze", [%blob "../inputs/day16.txt"]
+   ; (module Aoc2024.Day17), "Chronospatial Computer", [%blob "../inputs/day17.txt"]
   |]
 ;;
 
@@ -48,9 +49,7 @@ let main days_to_run run_example =
     let result =
       if run_example then DAY.example () else if input = "" then [] else DAY.run input
     in
-    let result_string =
-      "[" ^ (List.map string_of_int result |> String.concat ", ") ^ "]"
-    in
+    let result_string = "[ \"" ^ String.concat "\", \"" result ^ "\" ]" in
     Format.printf "Day %d: %s %s\n%!" day_num name result_string
   in
   Format.printf "Advent of Code 2024\n%!";

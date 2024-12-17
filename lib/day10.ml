@@ -1,6 +1,6 @@
 module Day10 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   module Coord = struct
     type t = int * int
@@ -88,7 +88,7 @@ end = struct
     let map = HeightMap.of_string input in
     let trails = find_trails map in
     let scores = score_trailheads trails in
-    [ scores; List.length trails ]
+    List.map string_of_int [ scores; List.length trails ]
   ;;
 
   let example () =

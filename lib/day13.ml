@@ -1,6 +1,6 @@
 module Day13 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   type coord =
     { x : int
@@ -68,6 +68,7 @@ end = struct
     List.map
       (fun f -> List.map f machines |> List.filter_map Fun.id |> List.fold_left ( + ) 0)
       [ calc; Fun.compose calc fix_prize ]
+    |> List.map string_of_int
   ;;
 
   let example () =

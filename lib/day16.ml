@@ -1,6 +1,6 @@
 module Day16 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   type e =
     | Wall
@@ -138,7 +138,7 @@ end = struct
 
   let run input =
     let maze, s_pos, _ = parse input in
-    solve maze s_pos
+    List.map string_of_int (solve maze s_pos)
   ;;
 
   let example () =

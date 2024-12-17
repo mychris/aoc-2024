@@ -1,6 +1,6 @@
 module Day05 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   module IntMap = Map.Make (Int)
 
@@ -67,7 +67,7 @@ end = struct
         (fun update -> List.sort (compare_with_ordering orderings) update)
         incorrect
     in
-    [ sum_middle correct; sum_middle corrected ]
+    List.map string_of_int [ sum_middle correct; sum_middle corrected ]
   ;;
 
   let run input =

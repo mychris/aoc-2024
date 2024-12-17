@@ -1,6 +1,6 @@
 module Day06 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   (***********************************************
    * Too many micro opimizations
@@ -199,7 +199,7 @@ end = struct
       | None -> CoordSet.add (Guard.position guard) visited
     in
     let visited = solve' lab guard (CoordSet.for_lab lab) in
-    [ CoordSet.cardinal visited; find_obstacles lab guard visited ]
+    List.map string_of_int [ CoordSet.cardinal visited; find_obstacles lab guard visited ]
   ;;
 
   let run input =

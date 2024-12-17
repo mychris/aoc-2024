@@ -1,6 +1,6 @@
 module Day08 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   module Coord = struct
     type t = int * int
@@ -83,7 +83,7 @@ end = struct
             CoordSet.empty)
         antinode_searchers
     in
-    List.map CoordSet.cardinal antinode_sets
+    List.map string_of_int (List.map CoordSet.cardinal antinode_sets)
   ;;
 
   let run input = solve (parse input)

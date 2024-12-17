@@ -1,6 +1,6 @@
 module Day11 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   module Pair = struct
     type t = int * int
@@ -53,7 +53,7 @@ end = struct
   let run input =
     let l = parse input in
     let times = [ 25; 75 ] in
-    List.map (fun t -> blink l t) times
+    List.map (fun t -> string_of_int (blink l t)) times
   ;;
 
   let example () = run "125 17\n"

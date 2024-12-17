@@ -1,6 +1,6 @@
 module Day07 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   let parse_number_list input =
     let rec parse_number_list' input =
@@ -66,7 +66,7 @@ end = struct
 
   let run input =
     let equations = parse input in
-    solve equations
+    List.map string_of_int (solve equations)
   ;;
 
   let example () =
@@ -82,7 +82,7 @@ end = struct
       ; 292, [ 11; 6; 16; 20 ]
       ]
     in
-    solve equations
+    List.map string_of_int (solve equations)
   ;;
 end
 

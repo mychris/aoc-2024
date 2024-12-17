@@ -1,6 +1,6 @@
 module Day09 : sig
-  val run : string -> int list
-  val example : unit -> int list
+  val run : string -> string list
+  val example : unit -> string list
 end = struct
   type block =
     { id : int
@@ -127,9 +127,11 @@ end = struct
   ;;
 
   let run input =
-    [ checksum (defragment (split_files_to_len_one (parse input)))
-    ; checksum (defragment (parse input))
-    ]
+    List.map
+      string_of_int
+      [ checksum (defragment (split_files_to_len_one (parse input)))
+      ; checksum (defragment (parse input))
+      ]
   ;;
 
   let example () = run "2333133121414131402"
