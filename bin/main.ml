@@ -21,6 +21,7 @@ let day_specs =
    ; (module Aoc2024.Day15), "Warehouse Woes", [%blob "../inputs/day15.txt"]
    ; (module Aoc2024.Day16), "Reindeer Maze", [%blob "../inputs/day16.txt"]
    ; (module Aoc2024.Day17), "Chronospatial Computer", [%blob "../inputs/day17.txt"]
+   ; (module Aoc2024.Day18), "RAM Run", [%blob "../inputs/day18.txt"]
   |]
 ;;
 

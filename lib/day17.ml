@@ -94,8 +94,8 @@ end = struct
     aux program 0 None
   ;;
 
-  let cmp_prog_out program out =
-    let out_arr = Array.of_list out in
+  let cmp_prog_state program state =
+    let out_arr = Array.of_list state.out in
     Array.length program = Array.length out_arr
     && Array.for_all2 (fun x y -> x = y) program out_arr
   ;;
@@ -112,8 +112,8 @@ end = struct
       else (
         match rev_program with
         | [] ->
-          if cmp_prog_out program (emulate_with_a program a_solution).out
-          then Some (a_solution lor this_a)
+          if cmp_prog_state program (emulate_with_a program a_solution)
+          then Some a_solution
           else None
         | hd :: tl ->
           let a_to_try = (a_solution lsl a_shift_amount) lor this_a in
