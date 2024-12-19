@@ -14,52 +14,48 @@ end = struct
     | Down
 
   type state =
-    { pos : int * int
+    { x : int
+    ; y : int
     ; dir : d
-    ; points : int
-    ; path : (int * int) list
     }
 
   let move s =
     match s.dir with
-    | Right -> { s with pos = fst s.pos, snd s.pos + 1; points = s.points + 1 }
-    | Left -> { s with pos = fst s.pos, snd s.pos - 1; points = s.points + 1 }
-    | Down -> { s with pos = fst s.pos + 1, snd s.pos; points = s.points + 1 }
-    | Up -> { s with pos = fst s.pos - 1, snd s.pos; points = s.points + 1 }
+    | Right -> { s with y = s.y + 1 }
+    | Left -> { s with y = s.y - 1 }
+    | Down -> { s with x = s.x + 1 }
+    | Up -> { s with x = s.x - 1 }
   ;;
 
   let rotate_cw s =
     match s.dir with
-    | Right -> { s with dir = Down; points = s.points + 1000 }
-    | Left -> { s with dir = Up; points = s.points + 1000 }
-    | Down -> { s with dir = Left; points = s.points + 1000 }
-    | Up -> { s with dir = Right; points = s.points + 1000 }
+    | Right -> { s with dir = Down }
+    | Left -> { s with dir = Up }
+    | Down -> { s with dir = Left }
+    | Up -> { s with dir = Right }
   ;;
 
   let rotate_ccw s =
     match s.dir with
-    | Right -> { s with dir = Up; points = s.points + 1000 }
-    | Left -> { s with dir = Down; points = s.points + 1000 }
-    | Down -> { s with dir = Right; points = s.points + 1000 }
-    | Up -> { s with dir = Left; points = s.points + 1000 }
+    | Right -> { s with dir = Up }
+    | Left -> { s with dir = Down }
+    | Down -> { s with dir = Right }
+    | Up -> { s with dir = Left }
   ;;
 
-  module Maze = Map.Make (struct
-      type t = int * int
+  module Maze = struct
+    let find state maze = maze.(state.x).(state.y)
+  end
 
-      let compare (x1, y1) (x2, y2) =
-        match compare x1 x2 with
-        | 0 -> compare y1 y2
-        | c -> c
-      ;;
-    end)
-
-  module StateSet = Set.Make (struct
+  module StateMap = Map.Make (struct
       type t = state
 
       let compare s1 s2 =
-        match compare s1.pos s2.pos with
-        | 0 -> compare s1.dir s2.dir
+        match compare s1.x s2.x with
+        | 0 ->
+          (match compare s1.y s2.y with
+           | 0 -> compare s1.dir s2.dir
+           | c -> c)
         | c -> c
       ;;
     end)
@@ -78,6 +74,9 @@ end = struct
 
   let parse input =
     let lines = String.split_on_char '\n' input in
+    let maze =
+      Array.make_matrix (List.length lines) (String.length (List.hd lines)) Free
+    in
     List.to_seq lines
     |> Seq.fold_lefti
          (fun (maze, s_pos, e_pos) x line ->
@@ -85,54 +84,63 @@ end = struct
            |> Seq.fold_lefti
                 (fun (maze, s_pos, e_pos) y c ->
                   match c with
-                  | '#' -> Maze.add (x, y) Wall maze, s_pos, e_pos
-                  | '.' -> Maze.add (x, y) Free maze, s_pos, e_pos
-                  | 'E' -> Maze.add (x, y) End maze, s_pos, (x, y)
-                  | 'S' -> Maze.add (x, y) Free maze, (x, y), e_pos
-                  | _ -> raise (Failure "input"))
+                  | '#' ->
+                    maze.(x).(y) <- Wall;
+                    maze, s_pos, e_pos
+                  | '.' ->
+                    maze.(x).(y) <- Free;
+                    maze, s_pos, e_pos
+                  | 'E' ->
+                    maze.(x).(y) <- End;
+                    maze, s_pos, (x, y)
+                  | 'S' ->
+                    maze.(x).(y) <- Free;
+                    maze, (x, y), e_pos
+                  | _ -> failwith "input")
                 (maze, s_pos, e_pos))
-         (Maze.empty, (0, 0), (0, 0))
+         (maze, (0, 0), (0, 0))
   ;;
 
   let solve maze s_pos =
-    let cache = ref StateSet.empty in
+    let cache = ref StateMap.empty in
     let paths = ref IntMap.empty in
     let work = Queue.create () in
-    let rec solve' maze =
-      if not (Queue.is_empty work)
-      then (
-        let state = Queue.pop work in
-        if StateSet.mem state !cache && (StateSet.find state !cache).points < state.points
-        then solve' maze
-        else (
-          cache := StateSet.remove state !cache;
-          match Maze.find state.pos maze with
-          | End ->
-            paths := IntMap.add_to_list state.points (List.rev state.path) !paths;
-            cache := StateSet.add state !cache;
-            solve' maze
-          | Wall -> solve' maze
-          | Free ->
-            cache := StateSet.add state !cache;
-            let move_state = move state in
-            let move_state =
-              { move_state with path = move_state.pos :: move_state.path }
-            in
-            Queue.push move_state work;
-            Queue.push (rotate_ccw state) work;
-            Queue.push (rotate_cw state) work;
-            solve' maze))
+    let rec solve' () =
+      match Queue.take_opt work with
+      | None -> ()
+      | Some (state, points, path) ->
+        (match Maze.find state maze with
+         | Wall -> solve' ()
+         | End ->
+           if StateMap.find_opt state !cache |> Option.value ~default:Int.max_int < points
+           then solve' ()
+           else (
+             cache := StateMap.add state points !cache;
+             paths := IntMap.add_to_list points (state :: path) !paths;
+             solve' ())
+         | Free ->
+           if StateMap.find_opt state !cache |> Option.value ~default:Int.max_int < points
+           then solve' ()
+           else (
+             cache := StateMap.add state points !cache;
+             let move_state = move state in
+             Queue.add (move_state, points + 1, state :: path) work;
+             Queue.add (rotate_ccw state, points + 1000, path) work;
+             Queue.add (rotate_cw state, points + 1000, path) work;
+             solve' ()))
     in
-    Queue.push { pos = s_pos; dir = Right; points = 0; path = [ s_pos ] } work;
-    solve' maze;
+    Queue.push ({ x = fst s_pos; y = snd s_pos; dir = Right }, 0, []) work;
+    solve' ();
     let lowest_points =
-      StateSet.fold
-        (fun s acc -> min acc s.points)
-        (StateSet.filter (fun s -> Maze.find s.pos maze = End) !cache)
-        Int.max_int
+      StateMap.to_seq !cache
+      |> Seq.filter_map (fun (state, p) ->
+        if Maze.find state maze = End then Some p else None)
+      |> Seq.fold_left min Int.max_int
     in
     let paths = IntMap.find lowest_points !paths in
-    let positions = List.flatten paths |> CoordSet.of_list in
+    let positions =
+      List.flatten paths |> List.map (fun s -> s.x, s.y) |> CoordSet.of_list
+    in
     [ lowest_points; CoordSet.cardinal positions ]
   ;;
 

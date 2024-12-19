@@ -43,50 +43,59 @@ end = struct
     [ q1; q2; q3; q4 ]
   ;;
 
-  let move specs width height times =
+  let move_single_spec times width height spec =
     let wrap n m = ((n mod m) + m) mod m in
-    let move' times width height spec =
-      { spec with
-        x = wrap (spec.x + (spec.vx * times)) width
-      ; y = wrap (spec.y + (spec.vy * times)) height
-      }
+    { spec with
+      x = wrap (spec.x + (spec.vx * times)) width
+    ; y = wrap (spec.y + (spec.vy * times)) height
+    }
+  ;;
+
+  let move specs width height times = List.map (move_single_spec times width height) specs
+
+  let move_with_pic specs pic width height times =
+    let aux times width height pic spec =
+      let old_x, old_y = spec.x, spec.y in
+      let new_spec = move_single_spec times width height spec in
+      pic.(old_y).(old_x) <- pic.(old_y).(old_x) - 1;
+      pic.(new_spec.y).(new_spec.x) <- pic.(new_spec.y).(new_spec.x) + 1;
+      new_spec
     in
-    List.map (move' times width height) specs
+    List.map (aux times width height pic) specs
   ;;
 
   (* lets check if there is a line which has more then 25 next to each other *)
-  (* chosen somewhat arbitrarily after looking at the ouput images *)
-  let check_tree specs =
-    let rec check_tree' specs this_line =
-      if this_line >= 25
+  (* chosen somewhat arbitrarily after looking at the "images" *)
+  let check_tree pic =
+    let rec check_tree_line this_line y pic_line =
+      if y = 1
+      then false
+      else if this_line >= 25
       then true
-      else (
-        match specs with
-        | f :: (s :: _ as tl) ->
-          if f.y <> s.y || s.x - f.x <> 1
-          then check_tree' tl 0
-          else check_tree' tl (this_line + 1)
-        | [] -> false
-        | _ :: [] -> false)
+      else if Array.unsafe_get pic_line y > 0 && Array.unsafe_get pic_line (y - 1) > 0
+      then check_tree_line (this_line + 1) (y - 1) pic_line
+      else check_tree_line 0 (y - 1) pic_line
     in
-    let specs =
-      List.fast_sort
-        (fun s1 s2 ->
-          match compare s1.y s2.y with
-          | 0 -> compare s1.x s2.x
-          | c -> c)
-        specs
+    let r =
+      Array.exists
+        (fun pic_line -> check_tree_line 0 (Array.length pic_line - 1) pic_line)
+        pic
     in
-    check_tree' specs 0
+    (*
+       if r then Array.iter (fun l -> Array.iter (fun e -> Format.printf "%c" (if e > 0 then '#' else ' ')) l; Format.printf "\n%!") pic;
+    *)
+    r
   ;;
 
   let find_tree specs width height =
-    let rec find_tree' specs count =
-      if check_tree specs
+    let pic = Array.make_matrix height width 0 in
+    List.iter (fun s -> pic.(s.y).(s.x) <- pic.(s.y).(s.x) + 1) specs;
+    let rec find_tree' specs pic count =
+      if check_tree pic
       then count
-      else find_tree' (move specs width height 1) (count + 1)
+      else find_tree' (move_with_pic specs pic width height 1) pic (count + 1)
     in
-    find_tree' specs 0
+    find_tree' specs pic 0
   ;;
 
   let run input =

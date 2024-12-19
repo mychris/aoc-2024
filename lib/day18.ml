@@ -72,8 +72,9 @@ end = struct
            if old_count > count
            then (
              Hashtbl.add cache coord count;
-             List.iter (fun c -> Queue.add (c, count + 1) queue)
-             [Coord.left coord; Coord.right coord; Coord.up coord; Coord.down coord];
+             List.iter
+               (fun c -> Queue.add (c, count + 1) queue)
+               [ Coord.left coord; Coord.right coord; Coord.up coord; Coord.down coord ];
              aux map)
            else aux map)
     in
