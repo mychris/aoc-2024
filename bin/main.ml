@@ -23,6 +23,7 @@ let day_specs =
    ; (module Aoc2024.Day17), "Chronospatial Computer", [%blob "../inputs/day17.txt"]
    ; (module Aoc2024.Day18), "RAM Run", [%blob "../inputs/day18.txt"]
    ; (module Aoc2024.Day19), "Linen Layout", [%blob "../inputs/day19.txt"]
+   ; (module Aoc2024.Day20), "Race Condition", [%blob "../inputs/day20.txt"]
   |]
 ;;
 
@@ -51,7 +52,9 @@ let main days_to_run run_example =
     let result =
       if run_example then DAY.example () else if input = "" then [] else DAY.run input
     in
-    let result_string = "[ \"" ^ String.concat "\", \"" result ^ "\" ]" in
+    let result_string =
+      if result = [] then "[]" else "[ \"" ^ String.concat "\", \"" result ^ "\" ]"
+    in
     Format.printf "Day %d: %s %s\n%!" day_num name result_string
   in
   Format.printf "Advent of Code 2024\n%!";
