@@ -24,6 +24,7 @@ let day_specs =
    ; (module Aoc2024.Day18), "RAM Run", [%blob "../inputs/day18.txt"]
    ; (module Aoc2024.Day19), "Linen Layout", [%blob "../inputs/day19.txt"]
    ; (module Aoc2024.Day20), "Race Condition", [%blob "../inputs/day20.txt"]
+   ; (module Aoc2024.Day21), "Keypad Conundrum", [%blob "../inputs/day21.txt"]
   |]
 ;;
 
